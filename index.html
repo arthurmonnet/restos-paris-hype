@@ -28,6 +28,21 @@
             font-size: 11px; 
             margin-top: 5px;
         }
+        .popup-content .nav-btn {
+            display: block;
+            background: #007AFF;
+            color: white;
+            text-align: center;
+            padding: 10px 15px;
+            border-radius: 8px;
+            text-decoration: none;
+            margin-top: 10px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        .popup-content .nav-btn:hover {
+            background: #0056b3;
+        }
     </style>
 </head>
 <body>
@@ -102,12 +117,15 @@
         // Add markers
         restaurants.forEach(r => {
             const marker = L.marker([r.lat, r.lng], { icon: icons[r.type] }).addTo(map);
+            const mapsUrl = `https://maps.apple.com/?q=${encodeURIComponent(r.name + ' ' + r.addr + ' Paris')}`;
+            const googleUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(r.name + ' ' + r.addr + ' Paris')}`;
             marker.bindPopup(`
                 <div class="popup-content">
                     <h3>${r.name}</h3>
                     <p>${r.desc}</p>
                     <p><strong>📍</strong> ${r.addr}</p>
                     <span class="tag">${r.type}</span>
+                    <a href="${mapsUrl}" target="_blank" class="nav-btn">📍 Ouvrir dans Plans</a>
                 </div>
             `);
         });
