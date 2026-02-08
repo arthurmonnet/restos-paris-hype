@@ -47,19 +47,32 @@
         .list-container { padding: 0; min-height: calc(100vh - 54px); }
         
         /* Filters */
-        .filters {
-            display: flex;
-            gap: 8px;
-            padding: 15px;
-            overflow-x: auto;
+        .filters-section {
             background: white;
             position: sticky;
             top: 54px;
             z-index: 100;
             border-bottom: 1px solid #eee;
         }
+        .filter-row {
+            display: flex;
+            gap: 8px;
+            padding: 12px 15px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .filter-row:first-child { padding-bottom: 6px; }
+        .filter-row:last-child { padding-top: 6px; border-top: 1px solid #f0f0f0; }
+        .filter-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #999;
+            text-transform: uppercase;
+            padding: 8px 0;
+            white-space: nowrap;
+        }
         .filter-btn {
-            padding: 8px 16px;
+            padding: 8px 14px;
             border-radius: 20px;
             border: 1px solid #ddd;
             background: white;
@@ -115,13 +128,22 @@
             font-size: 12px;
             color: #999;
         }
+        .card-tags {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
         .card-tag {
             display: inline-block;
             padding: 3px 10px;
             border-radius: 12px;
             font-size: 11px;
             font-weight: 500;
-            margin-top: 8px;
+        }
+        .card-arr {
+            background: #f0f0f0;
+            color: #666;
         }
         .card-nav {
             background: #007AFF;
@@ -136,17 +158,25 @@
         }
         .card-nav:hover { background: #0056b3; }
         
+        /* No results */
+        .no-results {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+        .no-results.hidden { display: none; }
+        
         /* Type colors */
         .type-pizza .card-icon { background: #ffeaec; }
-        .type-pizza .card-tag { background: #ffeaec; color: #e63946; }
+        .type-pizza .card-tag:not(.card-arr) { background: #ffeaec; color: #e63946; }
         .type-italien .card-icon { background: #fff3e6; }
-        .type-italien .card-tag { background: #fff3e6; color: #f4a261; }
+        .type-italien .card-tag:not(.card-arr) { background: #fff3e6; color: #f4a261; }
         .type-concept .card-icon { background: #e6f7f5; }
-        .type-concept .card-tag { background: #e6f7f5; color: #2a9d8f; }
+        .type-concept .card-tag:not(.card-arr) { background: #e6f7f5; color: #2a9d8f; }
         .type-monde .card-icon { background: #f3ebfa; }
-        .type-monde .card-tag { background: #f3ebfa; color: #9b5de5; }
+        .type-monde .card-tag:not(.card-arr) { background: #f3ebfa; color: #9b5de5; }
         .type-gastro .card-icon { background: #e8edf3; }
-        .type-gastro .card-tag { background: #e8edf3; color: #1d3557; }
+        .type-gastro .card-tag:not(.card-arr) { background: #e8edf3; color: #1d3557; }
         
         /* Map popups */
         .legend { 
@@ -199,15 +229,34 @@
     <!-- List View -->
     <div id="list-view" class="view">
         <div class="list-container">
-            <div class="filters">
-                <button class="filter-btn active" data-filter="all">Tous</button>
-                <button class="filter-btn" data-filter="pizza">🍕 Pizza</button>
-                <button class="filter-btn" data-filter="italien">🇮🇹 Italien</button>
-                <button class="filter-btn" data-filter="concept">✨ Concepts</button>
-                <button class="filter-btn" data-filter="monde">🌍 Monde</button>
-                <button class="filter-btn" data-filter="gastro">⭐ Gastro</button>
+            <div class="filters-section">
+                <div class="filter-row">
+                    <span class="filter-label">Type</span>
+                    <button class="filter-btn type-filter active" data-filter="all">Tous</button>
+                    <button class="filter-btn type-filter" data-filter="pizza">🍕 Pizza</button>
+                    <button class="filter-btn type-filter" data-filter="italien">🇮🇹 Italien</button>
+                    <button class="filter-btn type-filter" data-filter="concept">✨ Concepts</button>
+                    <button class="filter-btn type-filter" data-filter="monde">🌍 Monde</button>
+                    <button class="filter-btn type-filter" data-filter="gastro">⭐ Gastro</button>
+                </div>
+                <div class="filter-row">
+                    <span class="filter-label">Arr.</span>
+                    <button class="filter-btn arr-filter active" data-arr="all">Tous</button>
+                    <button class="filter-btn arr-filter" data-arr="2">2e</button>
+                    <button class="filter-btn arr-filter" data-arr="3">3e</button>
+                    <button class="filter-btn arr-filter" data-arr="5">5e</button>
+                    <button class="filter-btn arr-filter" data-arr="6">6e</button>
+                    <button class="filter-btn arr-filter" data-arr="8">8e</button>
+                    <button class="filter-btn arr-filter" data-arr="9">9e</button>
+                    <button class="filter-btn arr-filter" data-arr="10">10e</button>
+                    <button class="filter-btn arr-filter" data-arr="11">11e</button>
+                    <button class="filter-btn arr-filter" data-arr="15">15e</button>
+                    <button class="filter-btn arr-filter" data-arr="16">16e</button>
+                    <button class="filter-btn arr-filter" data-arr="17">17e</button>
+                </div>
             </div>
             <div class="restaurant-list" id="restaurant-list"></div>
+            <div class="no-results hidden" id="no-results">Aucun restaurant trouvé 🤷</div>
         </div>
     </div>
 
@@ -215,40 +264,40 @@
     <script>
         const restaurants = [
             // PIZZERIAS
-            { name: "Rori", lat: 48.8678, lng: 2.3789, type: "pizza", desc: "Pizza slice NY × Rome, par l'équipe de Bouche", addr: "96 rue Jean-Pierre Timbaud, 11e", icon: "🍕" },
-            { name: "Antica Pizzeria Da Michele", lat: 48.8533, lng: 2.3711, type: "pizza", desc: "Institution napolitaine depuis 1870", addr: "19 Faubourg Saint-Antoine, 11e", icon: "🍕" },
-            { name: "Pizza Viva", lat: 48.8442, lng: 2.3505, type: "pizza", desc: "Pâte levain centenaire, par Pane Vivo", addr: "Quartier Latin, 5e", icon: "🍕" },
-            { name: "Pizi", lat: 48.8620, lng: 2.3650, type: "pizza", desc: "Pizzas romaines croustillantes", addr: "Paris 10e", icon: "🍕" },
-            { name: "Osteria degli Amici", lat: 48.8686, lng: 2.3412, type: "pizza", desc: "Pizzas en forme de cœur ❤️", addr: "2e arrondissement", icon: "🍕" },
+            { name: "Rori", lat: 48.8678, lng: 2.3789, type: "pizza", desc: "Pizza slice NY × Rome, par l'équipe de Bouche", addr: "96 rue Jean-Pierre Timbaud", arr: "11", icon: "🍕" },
+            { name: "Antica Pizzeria Da Michele", lat: 48.8533, lng: 2.3711, type: "pizza", desc: "Institution napolitaine depuis 1870", addr: "19 Faubourg Saint-Antoine", arr: "11", icon: "🍕" },
+            { name: "Pizza Viva", lat: 48.8442, lng: 2.3505, type: "pizza", desc: "Pâte levain centenaire, par Pane Vivo", addr: "Quartier Latin", arr: "5", icon: "🍕" },
+            { name: "Pizi", lat: 48.8620, lng: 2.3650, type: "pizza", desc: "Pizzas romaines croustillantes", addr: "Paris", arr: "10", icon: "🍕" },
+            { name: "Osteria degli Amici", lat: 48.8686, lng: 2.3412, type: "pizza", desc: "Pizzas en forme de cœur ❤️", addr: "Paris", arr: "2", icon: "🍕" },
             
             // ITALIENS
-            { name: "Sant Ambroeus", lat: 48.8539, lng: 2.3338, type: "italien", desc: "Institution milanaise légendaire", addr: "Saint-Germain-des-Prés, 6e", icon: "🇮🇹" },
-            { name: "Altro Frenchie", lat: 48.8649, lng: 2.3456, type: "italien", desc: "Par le chef Greg Marchand", addr: "Sentier, 2e", icon: "🇮🇹" },
-            { name: "Vinello", lat: 48.8867, lng: 2.3189, type: "italien", desc: "Bistronomie transalpine", addr: "Batignolles, 17e", icon: "🇮🇹" },
-            { name: "Ischia", lat: 48.8467, lng: 2.2892, type: "italien", desc: "Par Denny Imbroisi (ex-Lignac)", addr: "15e arrondissement", icon: "🇮🇹" },
-            { name: "Adela", lat: 48.8712, lng: 2.3456, type: "italien", desc: "Pâtes fraîches, décor Art Nouveau", addr: "Grands Boulevards, 9e", icon: "🇮🇹" },
-            { name: "Cassaro's", lat: 48.8535, lng: 2.3348, type: "italien", desc: "Dolce Vita années 50", addr: "Saint-Germain-des-Prés, 6e", icon: "🇮🇹" },
-            { name: "Pezzopane", lat: 48.8630, lng: 2.3622, type: "italien", desc: "Paninis napolitains maison", addr: "Marais, 3e", icon: "🇮🇹" },
+            { name: "Sant Ambroeus", lat: 48.8539, lng: 2.3338, type: "italien", desc: "Institution milanaise légendaire", addr: "Saint-Germain-des-Prés", arr: "6", icon: "🇮🇹" },
+            { name: "Altro Frenchie", lat: 48.8649, lng: 2.3456, type: "italien", desc: "Par le chef Greg Marchand", addr: "Sentier", arr: "2", icon: "🇮🇹" },
+            { name: "Vinello", lat: 48.8867, lng: 2.3189, type: "italien", desc: "Bistronomie transalpine", addr: "Batignolles", arr: "17", icon: "🇮🇹" },
+            { name: "Ischia", lat: 48.8467, lng: 2.2892, type: "italien", desc: "Par Denny Imbroisi (ex-Lignac)", addr: "Paris", arr: "15", icon: "🇮🇹" },
+            { name: "Adela", lat: 48.8712, lng: 2.3456, type: "italien", desc: "Pâtes fraîches, décor Art Nouveau", addr: "Grands Boulevards", arr: "9", icon: "🇮🇹" },
+            { name: "Cassaro's", lat: 48.8535, lng: 2.3348, type: "italien", desc: "Dolce Vita années 50", addr: "Saint-Germain-des-Prés", arr: "6", icon: "🇮🇹" },
+            { name: "Pezzopane", lat: 48.8630, lng: 2.3622, type: "italien", desc: "Paninis napolitains maison", addr: "Marais", arr: "3", icon: "🇮🇹" },
             
             // CONCEPTS HYPE
-            { name: "Envie le Banquet", lat: 48.8656, lng: 2.3612, type: "concept", desc: "Buffet à volonté anti-gaspi par Eloy Spinnler", addr: "148 rue du Temple, 3e", icon: "✨" },
-            { name: "De Vie", lat: 48.8600, lng: 2.3700, type: "concept", desc: "Bar cocktails × gastro, ex-Little Red Door", addr: "Paris 3e", icon: "🍸" },
-            { name: "Wukong The Grand Master", lat: 48.8722, lng: 2.3656, type: "concept", desc: "Cocktails + dim sum, déco Wong Kar-wai", addr: "Canal Saint-Martin, 10e", icon: "🥟" },
+            { name: "Envie le Banquet", lat: 48.8656, lng: 2.3612, type: "concept", desc: "Buffet à volonté anti-gaspi par Eloy Spinnler", addr: "148 rue du Temple", arr: "3", icon: "✨" },
+            { name: "De Vie", lat: 48.8600, lng: 2.3700, type: "concept", desc: "Bar cocktails × gastro, ex-Little Red Door", addr: "Paris", arr: "3", icon: "🍸" },
+            { name: "Wukong The Grand Master", lat: 48.8722, lng: 2.3656, type: "concept", desc: "Cocktails + dim sum, déco Wong Kar-wai", addr: "Canal Saint-Martin", arr: "10", icon: "🥟" },
             
             // CUISINES DU MONDE
-            { name: "Gourou", lat: 48.8556, lng: 2.3878, type: "monde", desc: "Street-food indienne revisitée", addr: "42 rue Léon Frot, 11e", icon: "🇮🇳" },
-            { name: "Jamrock", lat: 48.8650, lng: 2.3750, type: "monde", desc: "Cuisine jamaïcaine", addr: "Paris 11e", icon: "🇯🇲" },
-            { name: "Mazmez", lat: 48.8600, lng: 2.3500, type: "monde", desc: "Libanais par @pari_beyrouth", addr: "Paris", icon: "🇱🇧" },
-            { name: "Ypseli", lat: 48.8656, lng: 2.3478, type: "monde", desc: "Néo-taverne grecque", addr: "Montorgueil, 2e", icon: "🇬🇷" },
-            { name: "Jip", lat: 48.8589, lng: 2.3800, type: "monde", desc: "Maison coréenne", addr: "Voltaire, 11e", icon: "🇰🇷" },
-            { name: "La Joie", lat: 48.8550, lng: 2.3650, type: "monde", desc: "Sri-lankais", addr: "Paris", icon: "🇱🇰" },
-            { name: "SENsation", lat: 48.8656, lng: 2.3800, type: "monde", desc: "Chinois raffiné par Samuel Lee", addr: "rue Saint-Maur, 11e", icon: "🇨🇳" },
+            { name: "Gourou", lat: 48.8556, lng: 2.3878, type: "monde", desc: "Street-food indienne revisitée", addr: "42 rue Léon Frot", arr: "11", icon: "🇮🇳" },
+            { name: "Jamrock", lat: 48.8650, lng: 2.3750, type: "monde", desc: "Cuisine jamaïcaine", addr: "Paris", arr: "11", icon: "🇯🇲" },
+            { name: "Mazmez", lat: 48.8600, lng: 2.3500, type: "monde", desc: "Libanais par @pari_beyrouth", addr: "Paris", arr: "3", icon: "🇱🇧" },
+            { name: "Ypseli", lat: 48.8656, lng: 2.3478, type: "monde", desc: "Néo-taverne grecque", addr: "Montorgueil", arr: "2", icon: "🇬🇷" },
+            { name: "Jip", lat: 48.8589, lng: 2.3800, type: "monde", desc: "Maison coréenne", addr: "Voltaire", arr: "11", icon: "🇰🇷" },
+            { name: "La Joie", lat: 48.8550, lng: 2.3650, type: "monde", desc: "Sri-lankais", addr: "Paris", arr: "3", icon: "🇱🇰" },
+            { name: "SENsation", lat: 48.8656, lng: 2.3800, type: "monde", desc: "Chinois raffiné par Samuel Lee", addr: "rue Saint-Maur", arr: "11", icon: "🇨🇳" },
             
             // GASTRO / BISTRONOMIE
-            { name: "IRWIN", lat: 48.8550, lng: 2.3400, type: "gastro", desc: "Par Irwin Durand (ex-Guy Savoy)", addr: "Paris 6e", icon: "⭐" },
-            { name: "Geoélia", lat: 48.8650, lng: 2.2750, type: "gastro", desc: "Chef étoilé Camille Saint M'leux", addr: "16e arrondissement", icon: "⭐" },
-            { name: "Zostera", lat: 48.8670, lng: 2.2780, type: "gastro", desc: "Chef Julien Dumas, gastro poétique", addr: "16e arrondissement", icon: "⭐" },
-            { name: "Aqua Kyoto", lat: 48.8698, lng: 2.3075, type: "gastro", desc: "Rooftop japonais, vue Tour Eiffel", addr: "26 Champs-Élysées, 8e", icon: "🗼" }
+            { name: "IRWIN", lat: 48.8550, lng: 2.3400, type: "gastro", desc: "Par Irwin Durand (ex-Guy Savoy)", addr: "Paris", arr: "6", icon: "⭐" },
+            { name: "Geoélia", lat: 48.8650, lng: 2.2750, type: "gastro", desc: "Chef étoilé Camille Saint M'leux", addr: "Paris", arr: "16", icon: "⭐" },
+            { name: "Zostera", lat: 48.8670, lng: 2.2780, type: "gastro", desc: "Chef Julien Dumas, gastro poétique", addr: "Paris", arr: "16", icon: "⭐" },
+            { name: "Aqua Kyoto", lat: 48.8698, lng: 2.3075, type: "gastro", desc: "Rooftop japonais, vue Tour Eiffel", addr: "26 Champs-Élysées", arr: "8", icon: "🗼" }
         ];
 
         const typeLabels = {
@@ -258,6 +307,9 @@
             monde: "Cuisine du monde",
             gastro: "Gastro"
         };
+
+        let activeType = 'all';
+        let activeArr = 'all';
 
         // Tab switching
         document.querySelectorAll('.tab').forEach(tab => {
@@ -275,36 +327,59 @@
         // Build list
         const listContainer = document.getElementById('restaurant-list');
         restaurants.forEach(r => {
-            const mapsUrl = `https://maps.apple.com/?q=${encodeURIComponent(r.name + ' ' + r.addr + ' Paris')}`;
+            const mapsUrl = `https://maps.apple.com/?q=${encodeURIComponent(r.name + ' ' + r.addr + ' Paris ' + r.arr + 'e')}`;
             const card = document.createElement('div');
             card.className = `restaurant-card type-${r.type}`;
             card.dataset.type = r.type;
+            card.dataset.arr = r.arr;
             card.innerHTML = `
                 <div class="card-icon">${r.icon}</div>
                 <div class="card-content">
                     <div class="card-name">${r.name}</div>
                     <div class="card-desc">${r.desc}</div>
                     <div class="card-addr">📍 ${r.addr}</div>
-                    <span class="card-tag">${typeLabels[r.type]}</span>
+                    <div class="card-tags">
+                        <span class="card-tag">${typeLabels[r.type]}</span>
+                        <span class="card-tag card-arr">${r.arr}e arr.</span>
+                    </div>
                 </div>
                 <a href="${mapsUrl}" target="_blank" class="card-nav">Y aller</a>
             `;
             listContainer.appendChild(card);
         });
 
-        // Filters
-        document.querySelectorAll('.filter-btn').forEach(btn => {
+        function applyFilters() {
+            let visibleCount = 0;
+            document.querySelectorAll('.restaurant-card').forEach(card => {
+                const typeMatch = activeType === 'all' || card.dataset.type === activeType;
+                const arrMatch = activeArr === 'all' || card.dataset.arr === activeArr;
+                if (typeMatch && arrMatch) {
+                    card.classList.remove('hidden');
+                    visibleCount++;
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+            document.getElementById('no-results').classList.toggle('hidden', visibleCount > 0);
+        }
+
+        // Type filters
+        document.querySelectorAll('.type-filter').forEach(btn => {
             btn.addEventListener('click', () => {
-                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.type-filter').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
-                const filter = btn.dataset.filter;
-                document.querySelectorAll('.restaurant-card').forEach(card => {
-                    if (filter === 'all' || card.dataset.type === filter) {
-                        card.classList.remove('hidden');
-                    } else {
-                        card.classList.add('hidden');
-                    }
-                });
+                activeType = btn.dataset.filter;
+                applyFilters();
+            });
+        });
+
+        // Arrondissement filters
+        document.querySelectorAll('.arr-filter').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.arr-filter').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                activeArr = btn.dataset.arr;
+                applyFilters();
             });
         });
 
@@ -339,12 +414,12 @@
         // Add markers
         restaurants.forEach(r => {
             const marker = L.marker([r.lat, r.lng], { icon: icons[r.type] }).addTo(map);
-            const mapsUrl = `https://maps.apple.com/?q=${encodeURIComponent(r.name + ' ' + r.addr + ' Paris')}`;
+            const mapsUrl = `https://maps.apple.com/?q=${encodeURIComponent(r.name + ' ' + r.addr + ' Paris ' + r.arr + 'e')}`;
             marker.bindPopup(`
                 <div class="popup-content">
                     <h3>${r.name}</h3>
                     <p>${r.desc}</p>
-                    <p><strong>📍</strong> ${r.addr}</p>
+                    <p><strong>📍</strong> ${r.addr}, ${r.arr}e</p>
                     <span class="tag">${typeLabels[r.type]}</span>
                     <a href="${mapsUrl}" target="_blank" class="nav-btn">📍 Ouvrir dans Plans</a>
                 </div>
